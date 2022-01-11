@@ -1,7 +1,7 @@
-SOURCE_URL=url of app's source
-SOURCE_SUM=sha256 checksum
+SOURCE_URL=http://vaemendis.net/ubooquity/downloads/Ubooquity-2.1.2.zip
+SOURCE_SUM=d880955b1cb5635be70f7a9d4ffdd1cab4f528683e9fc7e978b6e3658a69024c
 SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=
+SOURCE_FORMAT=zip
+SOURCE_IN_SUBDIR=false
+SOURCE_FILENAME=Ubooquity.jar
 SOURCE_EXTRACT=true
