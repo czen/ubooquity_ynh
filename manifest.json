@@ -67,6 +67,24 @@
                     "en": "Admin page password.",
                     "fr": "French."
                 }
+            },
+            {
+                "name": "books path",
+                "type": "string",
+                "help": {
+                    "en": "Path to books library.",
+                    "fr": "French books."
+                },
+                "default": "/books"
+            },
+            {
+                "name": "is_calibre",
+                "type": "boolean",
+                "ask": {
+                    "en": "Are shared books in Calibre library folder?",
+                    "fr": "Are you french?"
+                },
+                "default": false
             }
         ]
     }

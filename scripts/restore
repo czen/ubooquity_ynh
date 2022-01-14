@@ -124,6 +124,13 @@ ynh_script_progression --message="Reinstalling dependencies..." --time --weight=
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
+# INSTALL NODEJS
+#=================================================
+ynh_script_progression --message="Installing NodeJS..." --weight=12
+
+ynh_install_nodejs --nodejs_version=$nodejs_version
+
+#=================================================
 # RESTORE THE MYSQL DATABASE
 #=================================================
 #ynh_script_progression --message="Restoring the MySQL database..." --time --weight=1
@@ -166,6 +173,7 @@ yunohost service add $app --description="Ubooquity ebook server" --log="/var/log
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
+mkdir -p "/var/log/$app"
 ynh_script_progression --message="Starting a systemd service..." --time --weight=1
 
 ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"

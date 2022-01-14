@@ -103,6 +103,7 @@ ynh_script_progression --message="Removing dependencies..." --time --weight=1
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
+# TODO: remove nodejs
 
 #=================================================
 # CLOSE A PORT

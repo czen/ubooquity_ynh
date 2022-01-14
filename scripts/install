@@ -118,6 +118,13 @@ ynh_script_progression --message="Installing dependencies..." --time --weight=1
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
+# INSTALL NODEJS
+#=================================================
+ynh_script_progression --message="Installing NodeJS..." --weight=12
+
+ynh_install_nodejs --nodejs_version=$nodejs_version
+
+#=================================================
 # CREATE DEDICATED USER
 #=================================================
 ynh_script_progression --message="Configuring system user..." --time --weight=1
@@ -230,24 +237,6 @@ chmod 750 "$datadir"
 chmod -R o-rwx "$datadir"
 chown -R $app:www-data "$datadir"
 
-#=================================================
-# ADD A CONFIGURATION
-#=================================================
-#ynh_script_progression --message="Adding a configuration file..." --time --weight=1
-
-### You can add specific configuration files.
-###
-### Typically, put your template conf file in ../conf/your_config_file
-### The template may contain strings such as __FOO__ or __FOO_BAR__,
-### which will automatically be replaced by the values of $foo and $foo_bar
-###
-### ynh_add_config will also keep track of the config file's checksum,
-### which later during upgrade may allow to automatically backup the config file
-### if it's found that the file was manually modified
-###
-### Check the documentation of `ynh_add_config` for more info.
-
-#ynh_add_config --template="some_config_file" --destination="$final_path/some_config_file"
 
 # FIXME: this should be handled by the core in the future
 # You may need to use chmod 600 instead of 400,
@@ -376,6 +365,61 @@ ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$ap
 # Create a dedicated Fail2Ban config
 #ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="Regex to match into the log for a failed login"
 
+sleep 5
+
+# Restart a systemd service
+ynh_systemd_action --service_name=$app --action="restart" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Setting configuration file..." --time --weight=1
+
+### You can add specific configuration files.
+###
+### Typically, put your template conf file in ../conf/your_config_file
+### The template may contain strings such as __FOO__ or __FOO_BAR__,
+### which will automatically be replaced by the values of $foo and $foo_bar
+###
+### ynh_add_config will also keep track of the config file's checksum,
+### which later during upgrade may allow to automatically backup the config file
+### if it's found that the file was manually modified
+###
+### Check the documentation of `ynh_add_config` for more info.
+#path_relative="${path_url:1}"
+#sed  -i 's/\"reverseProxyPrefix\" : \"\"/\"reverseProxyPrefix\" : \"$path_relative\"/g' "$final_path/preferences.json"
+
+#ynh_add_config --template="some_config_file" --destination="$final_path/some_config_file"
+
+ynh_script_progression --message="Setting up admin credentials..." --time --weight=1
+
+# Set the app as temporarily public for curl call
+# Making the app public for curl
+ynh_permission_update --permission="main" --add="visitors"
+### N.B. : the following extra permissions only make sense if your app
+### does have for example an admin interface or an API.
+ynh_permission_create --permission="admin" --url="/admin" --allowed=$admin
+ynh_permission_update --permission="admin" --add="visitors"
+
+#exit 0
+
+salt=$(ynh_local_curl "/admin-res/cryptoparams" | jq -r '.salt')
+# hash=$(echo -n "$password" | openssl sha256 -hmac "$salt") # wrong hash
+hash=$(node "passwd/get_hash.js" $password $salt)
+
+ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app/$app.log"
+
+touch "$final_path/webadmin.cred"
+echo -n "$hash" > "$final_path/webadmin.cred"
+ynh_script_progression --message="Got hash..." --time --weight=1
+echo $hash
+echo "\n"
+
+# Remove the public access
+ynh_permission_update --permission="main" --remove="visitors"
+ynh_permission_update --permission="admin" --remove="visitors"
+
+ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
 #=================================================
 # SETUP SSOWAT
 #=================================================
@@ -389,11 +433,6 @@ then
 	ynh_permission_update --permission="main" --add="visitors"
 fi
 
-### N.B. : the following extra permissions only make sense if your app
-### does have for example an admin interface or an API.
-
-# Only the admin can access the admin panel of the app (if the app has an admin panel)
-ynh_permission_create --permission="admin" --url="/admin" --allowed=$admin
 
 # Everyone can access the API part
 # We don't want to display the tile in the SSO so we put --show_tile="false"

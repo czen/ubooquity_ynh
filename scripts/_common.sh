@@ -7,6 +7,8 @@
 # dependencies used by the app
 pkg_dependencies="default-jre"
 
+nodejs_version="14"
+
 #=================================================
 # PERSONAL HELPERS
 #=================================================
