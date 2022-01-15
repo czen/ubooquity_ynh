@@ -38,8 +38,8 @@
             {
                 "name": "path",
                 "type": "path",
-                "example": "/",
-                "default": "/"
+                "example": "/ubooquity",
+                "default": "/ubooquity"
             },
             {
                 "name": "admin",

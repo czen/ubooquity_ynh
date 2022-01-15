@@ -367,9 +367,6 @@ ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$ap
 
 sleep 5
 
-# Restart a systemd service
-ynh_systemd_action --service_name=$app --action="restart" --log_path="/var/log/$app/$app.log"
-
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
@@ -386,10 +383,14 @@ ynh_script_progression --message="Setting configuration file..." --time --weight
 ### if it's found that the file was manually modified
 ###
 ### Check the documentation of `ynh_add_config` for more info.
-#path_relative="${path_url:1}"
-#sed  -i 's/\"reverseProxyPrefix\" : \"\"/\"reverseProxyPrefix\" : \"$path_relative\"/g' "$final_path/preferences.json"
+path_relative="${path_url:1}"
+sed  -i "s/\"reverseProxyPrefix\" : \"\"/\"reverseProxyPrefix\" : \"$path_relative\"/g" "$final_path/preferences.json"
 
 #ynh_add_config --template="some_config_file" --destination="$final_path/some_config_file"
+
+# Restart a systemd service
+ynh_systemd_action --service_name=$app --action="restart" --log_path="/var/log/$app/$app.log"
+
 
 ynh_script_progression --message="Setting up admin credentials..." --time --weight=1
 
